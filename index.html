@@ -48,6 +48,24 @@ var butttonDifferences = {};
 // For rects and ellipses, I should take the larger of the two dimensions
 // I should also compute area, dammit
 
+function getSides(buttonShape) {
+    var sides;
+    if (buttonShape == 'circle') {
+        sides = 0;
+    } else if (buttonShape == 'triangle') {
+        sides = 3;
+    } else if (buttonShape == 'pentagon') {
+        sides = 5;
+    } else if (buttonShape == 'hexagon') {
+        sides = 6;
+    } else if (buttonShape == 'octagon') {
+        sides = 8;
+    } else {
+        sides = 4;
+    }
+    return sides;
+}
+
 function addButton(b, location, color, shape, radius) {
     // Calculate brightness
     red = parseInt(color.substring(1, 3), 16);
@@ -56,20 +74,7 @@ function addButton(b, location, color, shape, radius) {
     brightness = red + green + blue / 3;
 
     // Get side count
-    var sides;
-    if (shape == 'circle') {
-        sides = 0;
-    } else if (shape == 'triangle') {
-        sides = 3;
-    } else if (shape == 'pentagon') {
-        sides = 5;
-    } else if (shape == 'hexagon') {
-        sides = 6;
-    } else if (shape == 'octagon') {
-        sides = 8;
-    } else {
-        sides = 4;
-    }
+    var sides = getSides(shape);
 
     // I am sure there is a cute way to get this programmaticaly, but I won't sweat it for now
     // also I need to sort out "radius" for rectangles
@@ -176,7 +181,7 @@ function makeButton(paper, location, color, shape, radius, rotation, modFunction
     }
 
     var button = buttonFunctions[currentShape](paper, currentLocation, currentRadius, currentRotation)
-    addButton(button, currentLocation, currentColor, currentShape, radius, rotation);
+    addButton(button, currentLocation, currentColor, currentShape, currentRadius, rotation);
     button.attr("fill", currentColor);
  }
 
@@ -192,14 +197,37 @@ function makeRandomButton(paper) {
     makeButton(paper, location, color, shape, radius, rotation);
  }
 
+function getOffsetAngle(buttonShape) {
+    var sides = getSides(buttonShape);
+    return ((sides - 2) * Math.PI) / (2 * sides);
+}
 
+function getOffset(buttonShape, buttonRadius) {
+    // We need a function
+    if (buttonShape == 'circle' || buttonShape == 'diamond' || buttonShape == 'octagon') {
+        return 2 * buttonRadius.x;
+    } else {
+        var angle = getOffsetAngle(buttonShape);
+        var offset = buttonRadius.y * Math.sin(angle);
+        if (getSides(buttonShape) % 2 == 0) {
+            return 2 * offset;
+        } else {
+            return buttonRadius.x + offset;
+        }
+    }
+}
 
 function makeLine(paper, startingPoint, length, spacing, angle, buttonColor, buttonShape, buttonRadius, buttonRotation, modFunctions) {
+
+        // just for squares, for now...
+        var offset = getOffset(buttonShape, buttonRadius)
+        console.log(buttonRadius, offset);
+
         for (var i = 0; i < length; i++) {
-            var x = Math.floor(Math.cos(angle) * (i * (spacing + buttonRadius.x))) + startingPoint.x;
-            var y = Math.floor(Math.sin(angle) * (i * (spacing + buttonRadius.y))) + startingPoint.y;
+            var x = Math.floor(Math.cos(angle) * (i * (spacing + offset))) + startingPoint.x;
+            var y = Math.floor(Math.sin(angle) * (i * (spacing + offset))) + startingPoint.y;
             var location = {x: x, y: y};
-            console.log(location);
+            
             makeButton(paper, location, buttonColor, buttonShape, buttonRadius, buttonRotation, modFunctions, i);
     } 
 }
@@ -321,7 +349,7 @@ function init() {
     //makeRadial(paper, {x:400, y:200}, Math.PI, 5, 5, 55, '#AA0000', 'circle', {x:25, y:25}, 0, {});
 
     //makeLine(paper, {x: 100, y: 100}, 6, 20, Math.PI / 4, '#AA0000', 'circle', {x:50, y:50}, 0, {});
-    makeColumn(paper, {x: 50, y: 50}, 3, 0, '#AA0000', 'square', {x:50, y:50}, 0, {});
+    makeColumn(paper, {x: 50, y: 50}, 5, 0, '#AA0000', 'octagon', {x:50, y:50}, 0, {});
     //makeRow(paper, {x: 50, y: 100}, 6, 20, '#AA0000', 'circle', {x:50, y:50}, 0, modFunctions);
     //makeColumnGrid(paper, {x:50, y:50}, 3, 5, {x: 20, y:10}, 20, '#AA0000', 'circle', {x:50, y:50}, 0, {});
     //makeRowGrid(paper, {x:50, y:50}, 3, 5, {x: 0, y:0}, 0, '#AA0000', 'rectangle', {x:50, y:50}, 0, {});
