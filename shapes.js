@@ -40,7 +40,7 @@ function makeTri(paper, location, radius, rotation) {
 }
 
 function makeSquare(paper, location, radius, rotation) {
-    locations = makePolyPoints(location, 4, radius.x, Math.PI / 4);
+    locations = makePolyPoints(location, 4, radius.x, rotation + Math.PI / 4);
     pathString = makePathString(locations);
     var button = paper.path(pathString);
     return button;
@@ -63,7 +63,7 @@ function makeRect(paper, location, radius, rotation) {
 }
 
 function makeDiamond(paper, location, radius, rotation) {
-    locations = makePolyPoints(location, 4, radius.x, 0);
+    locations = makePolyPoints(location, 4, radius.x, rotation);
     pathString = makePathString(locations);
     var button = paper.path(pathString);
     return button;
