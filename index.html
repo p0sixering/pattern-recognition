@@ -199,8 +199,6 @@ function makeRandomButton(paper) {
 
 // only squares, for now.
 function getTrigOffset(lineAngle, buttonRotation, buttonRadius) {
-    console.log(lineAngle, buttonRotation, buttonRadius);
-
     var xDist = Math.cos(Math.PI / 4) * buttonRadius.x
     var angle = lineAngle - buttonRotation;
 
@@ -220,13 +218,15 @@ function makeLine(paper, startingPoint, length, spacing, angle, buttonColor, but
         if (buttonRotation > Math.PI / 4) {
             buttonRotation = buttonRotation % (Math.PI / 4);
         }
-        var offset = getTrigOffset(angle, buttonRotation, buttonRadius)
-        console.log(buttonRadius, offset, angle, Math.cos(angle));
+        var shapeDistance = getTrigOffset(angle, buttonRotation, buttonRadius)
+        //console.log(buttonRadius, shapeDistance, angle, Math.cos(angle));
 
         for (var i = 0; i < length; i++) {
-            var x = Math.floor(Math.cos(angle) * (i * (spacing + offset))) + startingPoint.x;
-            var y = Math.floor(Math.sin(angle) * (i * (spacing + offset))) + startingPoint.y;
+            //console.log(spacing, shapeDistance, startingPoint.x, i * (spacing + shapeDistance));
+            var x = Math.floor(Math.cos(angle) * (i * (spacing + shapeDistance))) + startingPoint.x;
+            var y = Math.floor(Math.sin(angle) * (i * (spacing + shapeDistance))) + startingPoint.y;
             var location = {x: x, y: y};
+            //console.log(location.x);
             
             makeButton(paper, location, buttonColor, buttonShape, buttonRadius, buttonRotation, modFunctions, i);
     } 
@@ -260,7 +260,7 @@ function makeColumnGrid(paper, startingPoint, width, height, spacing, offset, bu
 }
 
 function makeRowGrid(paper, startingPoint, width, height, spacing, offset, buttonColor, buttonShape, buttonRadius, buttonRotation, modFunctions) {
-    // example:  makeOffsetGrid(paper, {x:50, y:50}, 3, 5, {x: 20, y:10}, 2, '#AA0000', 'circle', {x:50, y:50}, 0, modFunctions);
+    // example:  makeRowGrid(paper, {x:50, y:50}, 3, 5, {x: 20, y:10}, 2, '#AA0000', 'circle', {x:50, y:50}, 0, modFunctions);
     for (var i = 0; i < height; i++) {
         if (i % 2 == 0) {
             var newStartingPoint = {};
@@ -275,6 +275,41 @@ function makeRowGrid(paper, startingPoint, width, height, spacing, offset, butto
         makeRow(paper, newStartingPoint, width, spacing.y, buttonColor, buttonShape, buttonRadius, buttonRotation, modFunctions);
     }
 }
+
+function makeAngledGrid(paper, startingPoint, width, height, spacing, angle, offset, buttonColor, buttonShape, buttonRadius, buttonRotation, modFunctions) {
+
+    // oh man, am I going to have to generalize this:  squares only, still
+    if (buttonRotation > Math.PI / 4) {
+            buttonRotation = buttonRotation % (Math.PI / 4);
+    }
+    shapeDistance = getTrigOffset(angle, buttonRotation, buttonRadius);
+
+    // OK, we have a disconnect here.  
+    // If my line angle is zero, then the ABOVE works, for ANY rotation of the buttons
+    // if my line angle is not zero, then I need to increase the offset by just a bit
+    // by the sine, maybe?  Because it should be 0 when my line angle is 0...
+
+    otherShapeDistance = getTrigOffset(Math.PI / 4 - angle, buttonRotation, buttonRadius);
+
+
+
+
+
+    for (var i = 0; i < height; i++) {
+        if (i % 2 == 0) {
+            var newStartingPoint = {};
+            newStartingPoint.x = startingPoint.x;
+            newStartingPoint.y = startingPoint.y + (i * (shapeDistance));
+        } else {
+            var newStartingPoint = {};
+            newStartingPoint.x = startingPoint.x + offset;
+            newStartingPoint.y = startingPoint.y + (i * (shapeDistance));
+
+        }
+        makeLine(paper, newStartingPoint, width, spacing.y, angle, buttonColor, buttonShape, buttonRadius, buttonRotation, modFunctions);
+    }
+
+    }
 
 function makeCircle(paper, startingPoint, radius, numberOfButtons, buttonColor, buttonShape, buttonRadius, buttonRotation, modFunctions) {
     // example: makeCircle(paper, {x:400, y:400}, 200, 10, '#AA0000', 'rectangle', {x:10, y:10}, 0, modFunctions);
@@ -345,18 +380,22 @@ function init() {
     //makeCircle(paper, {x:400, y:400}, 200, 10, '#AA0000', 'rectangle', {x:10, y:10}, 0, modFunctions);
     //makeRadial(paper, {x:400, y:200}, Math.PI, 5, 5, 55, '#AA0000', 'circle', {x:25, y:25}, 0, {});
 
-    makeLine(paper, {x: 100, y: 100}, 6, 0, Math.PI / 2.3, '#AA0000', 'square', {x:50, y:50}, Math.PI / 6, {});
-    makeLine(paper, {x: 160, y: 135}, 6, 0, Math.PI / 2.3, '#AA0000', 'square', {x:50, y:50}, Math.PI / 6, {});
+    // Sample lines
+    //makeLine(paper, {x: 100, y: 100}, 6, 0, 0, '#AA0000', 'square', {x:50, y:50}, Math.PI / 6, {});
+    //makeLine(paper, {x: 200, y: 200}, 6, 0, Math.PI / 3, '#AA0000', 'square', {x:50, y:50}, Math.PI / 6, {});
     //makeLine(paper, {x: 100, y: 200}, 6, 0, 0, '#AA0000', 'square', {x:50, y:50}, Math.PI / 8, {});
     //makeLine(paper, {x: 100, y: 300}, 6, 0, 0, '#AA0000', 'square', {x:50, y:50}, 0, {});
     //makeLine(paper, {x: 100, y: 400}, 6, 0, 0, '#AA0000', 'square', {x:50, y:50}, Math.PI / 6, {});
     //makeLine(paper, {x: 100, y: 500}, 6, 0, 0, '#AA0000', 'square', {x:50, y:50}, Math.PI / 2.71828, {});
+
+    // Sample columns and grids
     //makeColumn(paper, {x: 50, y: 50}, 5, 0, '#AA0000', 'triangle', {x:50, y:50}, 0, {});
     //makeRow(paper, {x: 50, y: 100}, 6, 0, '#AA0000', 'triangle', {x:50, y:50}, Math.PI / 6, {});
     //makeColumnGrid(paper, {x:50, y:50}, 3, 5, {x: 20, y:10}, 20, '#AA0000', 'circle', {x:50, y:50}, 0, {});
     //makeRowGrid(paper, {x:50, y:50}, 3, 5, {x: 0, y:0}, 0, '#AA0000', 'rectangle', {x:50, y:50}, 0, {});
 
-
+    // let's make angles!
+    makeAngledGrid(paper, {x:50, y:50}, 5, 2, {x:0, y:0}, Math.PI / 6, 0, '#AA0000', 'square', {x:50, y:50}, Math.PI / 6, {});
 
     // Create the differences
     generateDifferences();
